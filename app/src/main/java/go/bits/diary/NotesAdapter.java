@@ -1,11 +1,15 @@
 package go.bits.diary;
 
+import android.app.Service;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +38,7 @@ class NotesAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, final View convertView, ViewGroup parent) {
+    public View getView(final int position, final View convertView, ViewGroup parent) {
         View v;
         if(convertView == null){
             v = View.inflate(this.context, R.layout.textview_note, null);
@@ -48,6 +52,10 @@ class NotesAdapter extends BaseAdapter {
             final Intent intent = new Intent(this.context,EditNote.class);
             intent.putExtra("NoteID", notes.get(position).getID());
             intent.putExtra("NoteFolder", notes.get(position).getFolderName());
+
+            /**
+             * Click to edit note
+             */
             View.OnClickListener textViewClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -55,6 +63,22 @@ class NotesAdapter extends BaseAdapter {
                 }
             };
             noteTextView.setOnClickListener(textViewClickListener);
+
+            /**
+             * Long click to copy note text
+             */
+            View.OnLongClickListener textViewLongClickListener = new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("Note text", notes.get(position).getText());
+                    clipboard.setPrimaryClip(clip);
+                    Toast toast = Toast.makeText(context, "Note Copied", Toast.LENGTH_SHORT);
+                    toast.show();
+                    return true;
+                }
+            };
+            noteTextView.setOnLongClickListener(textViewLongClickListener);
         }
         return v;
     }

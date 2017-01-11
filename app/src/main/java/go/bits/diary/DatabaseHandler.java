@@ -93,6 +93,18 @@ class DatabaseHandler extends SQLiteOpenHelper {
             return 0;
         }
     }
+
+    void addToday(){
+        ContentValues values = new ContentValues();
+        values.put(KEY_DATE, dateFormat.format(new Date()));
+        SQLiteDatabase db = this.getWritableDatabase();
+        long id =  db.insert(TABLE_NAME_SCRIBBLE_DATES, null, values);
+    }
+
+    void removeDate(String date){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME_SCRIBBLE_DATES, KEY_DATE + "=?", new String[]{date});
+    }
     
      private String getTABLE_NAME(String Topic){
         SQLiteDatabase database = this.getReadableDatabase();
@@ -132,6 +144,9 @@ class DatabaseHandler extends SQLiteOpenHelper {
      * @param Topic : null => TABLE_NAME_SCRIBBLES, today
      */
     void addNote(String NOTE, @Nullable String Topic){
+        if(NOTE.length() == 0){
+            return;
+        }
         String TABLE_NAME;
         if(Topic == null || Objects.equals(Topic, TABLE_NAME_SCRIBBLES)){
             TABLE_NAME = TABLE_NAME_SCRIBBLES;

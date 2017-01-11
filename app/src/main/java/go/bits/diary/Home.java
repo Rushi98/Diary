@@ -1,6 +1,7 @@
 package go.bits.diary;
 
 import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -23,11 +25,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static go.bits.diary.R.color.tabBackground;
+import static go.bits.diary.R.color.tabUnselected;
+
 public class Home extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
     DatabaseHandler db;
     Button tabTopics;
     Button tabScribbles;
-    RelativeLayout topicsRL;
+    ColorStateList selectedTabTextColor;
+    ColorStateList unselectedTabTextColor;
+    LinearLayout topicsLL;
     LinearLayout scribblesLL;
     ListView topicsList;
     LinearLayout addTopicBar;
@@ -54,6 +61,7 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
         db = new DatabaseHandler(this);
 
         tabTopics = (Button) findViewById(R.id.button_topics);
+        unselectedTabTextColor = tabTopics.getTextColors();
         View.OnClickListener tabTopicsListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -63,6 +71,7 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
         tabTopics.setOnClickListener(tabTopicsListener);
 
         tabScribbles = (Button) findViewById(R.id.button_scribbles);
+        selectedTabTextColor = tabScribbles.getTextColors();
         View.OnClickListener tabScribblesListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,23 +117,23 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
         /*******************************************************************************************
          *                                      The Topics tab                                  *
          ******************************************************************************************/
-        topicsRL = (RelativeLayout) findViewById(R.id.topics);
+        topicsLL = (LinearLayout) findViewById(R.id.topics);
 
-        topicsList = (ListView) topicsRL.findViewById(R.id.list_topics);
+        topicsList = (ListView) topicsLL.findViewById(R.id.list_topics);
 
-        addTopicBar = (LinearLayout) topicsRL.findViewById(R.id.add_topic_bar);
+        addTopicBar = (LinearLayout) topicsLL.findViewById(R.id.add_topic_bar);
 
         addTopicText = (EditText) addTopicBar.findViewById(R.id.edit_topic_name);
 
         addTopicButton = (ImageButton) addTopicBar.findViewById(R.id.button_add_topic);
-
+        final Toast toast = Toast.makeText(this, "Topic already exists!", Toast.LENGTH_SHORT);
         View.OnClickListener addTopicListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(addTopicText.getText().toString().length() != 0) {
                     int status = db.addTopic(addTopicText.getText().toString());
                     if (status == 1) {
-                        Log.d("TopicAlreadyExists", addTopicText.getText().toString());
+                        toast.show();
                     }
                 }
                 addTopicText.setText("");
@@ -137,11 +146,15 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
 
     public void showTopicList(){
         scribblesLL.setVisibility(View.INVISIBLE);
-        topicsRL.setVisibility(View.VISIBLE);
+        topicsLL.setVisibility(View.VISIBLE);
+        tabTopics.setTextColor(selectedTabTextColor);
+        tabScribbles.setTextColor(unselectedTabTextColor);
     }
     public void showScribbles(){
         scribblesLL.setVisibility(View.VISIBLE);
-        topicsRL.setVisibility(View.INVISIBLE);
+        topicsLL.setVisibility(View.INVISIBLE);
+        tabScribbles.setTextColor(selectedTabTextColor);
+        tabTopics.setTextColor(unselectedTabTextColor);
     }
 
     @Override
@@ -151,6 +164,10 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
          * Scribbles
          */
         scribbleDates = db.getSCRIBBLE_DATES();
+        if(!scribbleDates.contains(DatabaseHandler.dateFormat.format(new Date()))){
+            db.addToday();
+            scribbleDates = db.getSCRIBBLE_DATES();
+        }
         Log.d("no", (String.valueOf(scribbleDates.size())));
         scribbleDatesUserFriendly = new ArrayList<>();
         /**
@@ -193,5 +210,17 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
         scribblesInputBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onStop(){
+        scribbleDates.remove(DatabaseHandler.dateFormat.format(new Date()));
+        for(String s: scribbleDates){
+            List<Note> scribbles = db.getScribblesDated(DatabaseHandler.dateFormat.parse(s, new ParsePosition(0)));
+            if(scribbles.size() == 0){
+                db.removeDate(s);
+            }
+        }
+        super.onStop();
     }
 }

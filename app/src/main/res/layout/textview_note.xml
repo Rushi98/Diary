@@ -4,4 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="Note"
-    android:padding="10sp"/>
+    android:padding="10sp"
+    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+    android:textColor="@android:color/black" />

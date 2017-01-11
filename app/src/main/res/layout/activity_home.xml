@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_home"
     android:layout_width="match_parent"
@@ -10,66 +11,85 @@
     <LinearLayout android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@color/colorPrimary">
 
         <Button android:id="@+id/button_topics"
             android:text="Topics"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            style="?android:borderlessButtonStyle" />
+            style="?android:borderlessButtonStyle"
+            android:background="@color/colorPrimaryDark"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textAllCaps="true"
+            android:textColor="@color/tabUnselected" />
 
         <Button android:id="@+id/button_scribbles"
             android:text="Scribbles"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            style="?android:borderlessButtonStyle" />
+            style="?android:borderlessButtonStyle"
+            android:background="@color/colorPrimaryDark"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:layout_below="@+id/tabs"
         android:id="@+id/topics"
-        android:visibility="invisible">
+        android:visibility="invisible"
+        android:elevation="0dp">
         <ListView
             android:id="@+id/list_topics"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/add_topic_bar"
-            android:layout_alignParentBottom="true"
             android:orientation="horizontal">
             <EditText
                 android:id="@+id/edit_topic_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Add a topic" />
+                android:hint="Add a topic"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse" />
             <ImageButton android:id="@+id/button_add_topic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_add_black_24dp"
+                app:srcCompat="@drawable/ic_add_black_24dp"
                 style="?android:borderlessButtonStyle" />
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/rl_scribbles"
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_height="match_parent"
-        android:layout_below="@id/tabs">
+        android:layout_below="@id/tabs"
+        android:elevation="-10dp">
 
         <android.support.v7.widget.AppCompatSpinner
             android:id="@+id/scribbles_date_spinner"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:spinnerMode="dialog"
+            android:textAlignment="center"
+            android:padding="5dp"
+            android:background="#dcedc8"
+            android:elevation="-10dp"
+            android:translationZ="-9dp"/>
 
         <ListView
             android:id="@+id/list_scribbles"
@@ -87,12 +107,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Scribble here" />
+                android:hint="Scribble here"
+                android:scrollbars="vertical"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large.Inverse" />
             <ImageButton android:id="@+id/button_scribble_done"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_check_black_24dp"
+                app:srcCompat="@drawable/ic_check_black_24dp"
                 style="?android:borderlessButtonStyle" />
         </LinearLayout>
     </LinearLayout>
+
 </RelativeLayout>
