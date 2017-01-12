@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -36,18 +37,22 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
     ColorStateList unselectedTabTextColor;
     LinearLayout topicsLL;
     LinearLayout scribblesLL;
+
     ListView topicsList;
     LinearLayout addTopicBar;
     EditText addTopicText;
     ImageButton addTopicButton;
+
     List<String> scribbleDates;
     List<String> scribbleDatesUserFriendly;
     String scribblesDate;
     @SuppressLint("SimpleDateFormat") SimpleDateFormat userFriendlyDate = new SimpleDateFormat("d MMM, yyyy");
     ArrayAdapter<String> dateAdapter;
     Spinner scribblesDateSpinner;
+    Boolean userChangedDate = false;
     ListView scribblesList;
     LinearLayout scribblesInputBar;
+    int scribblesInputBarHeight;
     EditText scribbleText;
     ImageButton doneScribble;
 
@@ -55,6 +60,7 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("what", "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
@@ -91,10 +97,19 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
         Log.d("sd", scribblesDate);
         scribblesDateSpinner = (Spinner) scribblesLL.findViewById(R.id.scribbles_date_spinner);
         scribblesDateSpinner.setOnItemSelectedListener(this);
+        View.OnTouchListener spinnerTouchListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                userChangedDate = true;
+                return false;
+            }
+        };
+        scribblesDateSpinner.setOnTouchListener(spinnerTouchListener);
 
         scribblesList = (ListView) scribblesLL.findViewById(R.id.list_scribbles);
 
         scribblesInputBar = (LinearLayout) scribblesLL.findViewById(R.id.scribbles_input_bar);
+        scribblesInputBarHeight =  scribblesInputBar.getLayoutParams().height;
 
         scribbleText = (EditText) scribblesInputBar.findViewById(R.id.edit_text_scribbles);
 
@@ -103,10 +118,10 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
         View.OnClickListener doneScribbleListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("what", "clicked");
                 db.addNote(scribbleText.getText().toString(), null);
                 scribbleText.setText("");
                 addTopicText.onEditorAction(EditorInfo.IME_ACTION_DONE);
+                Log.d("what", "doneScribbles");
                 onResume();
             }
         };
@@ -138,6 +153,7 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
                 }
                 addTopicText.setText("");
                 addTopicText.onEditorAction(EditorInfo.IME_ACTION_DONE);
+                Log.d("what", "add Topic");
                 onResume();
             }
         };
@@ -160,6 +176,7 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
     @Override
     protected void onResume(){
         super.onResume();
+        Log.d("date onResume", scribblesDate);
         /**
          * Scribbles
          */
@@ -168,7 +185,7 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
             db.addToday();
             scribbleDates = db.getSCRIBBLE_DATES();
         }
-        Log.d("no", (String.valueOf(scribbleDates.size())));
+        //Log.d("no", (String.valueOf(scribbleDates.size())));
         scribbleDatesUserFriendly = new ArrayList<>();
         /**
          * Convert Array of dates stored in db to user friendly dates' array
@@ -196,14 +213,22 @@ public class Home extends AppCompatActivity implements AdapterView.OnItemSelecte
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if(!Objects.equals(scribblesDate, DatabaseHandler.dateFormat.format(userFriendlyDate.parse(parent.getItemAtPosition(position).toString(), new ParsePosition(0))))) {
+        Log.d("selected", parent.getItemAtPosition(position).toString());
+        if(userChangedDate && !Objects.equals(scribblesDate, DatabaseHandler.dateFormat.format(userFriendlyDate.parse(parent.getItemAtPosition(position).toString(), new ParsePosition(0))))) {
+            userChangedDate = false;
             scribblesDate = DatabaseHandler.dateFormat.format(userFriendlyDate.parse(parent.getItemAtPosition(position).toString(), new ParsePosition(0)));
             if (!Objects.equals(scribblesDate, DatabaseHandler.dateFormat.format(new Date()))) {
-                scribblesInputBar.setVisibility(View.INVISIBLE);
+                scribblesInputBar.getLayoutParams().height = 0;
+                //scribblesInputBar.setVisibility(View.INVISIBLE);
             } else {
-                scribblesInputBar.setVisibility(View.VISIBLE);
+                scribblesInputBar.getLayoutParams().height = scribblesInputBarHeight;
+                //scribblesInputBar.setVisibility(View.VISIBLE);
             }
+            Log.d("what", "onItemSelected");
             onResume();
+        }
+        else if (!userChangedDate){
+            scribblesDateSpinner.setSelection(scribbleDates.indexOf(scribblesDate));
         }
     }
 
